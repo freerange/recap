@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>recap.rb</title>
+  <link rel="stylesheet" href="http://gofreerange.com/stylesheets/rocco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="recap.html">recap.rb</a>
+          <a class="source" href="recap/recipes.html">recipes.rb</a>
+          <a class="source" href="recap/recipes/rails.html">rails.rb</a>
+          <a class="source" href="recap/recipes/ruby.html">ruby.rb</a>
+          <a class="source" href="recap/recipes/static.html">static.rb</a>
+          <a class="source" href="recap/support/capistrano_extensions.html">capistrano_extensions.rb</a>
+          <a class="source" href="recap/support/cli.html">cli.rb</a>
+          <a class="source" href="recap/support/compatibility.html">compatibility.rb</a>
+          <a class="source" href="recap/support/environment.html">environment.rb</a>
+          <a class="source" href="recap/support/namespace.html">namespace.rb</a>
+          <a class="source" href="recap/support/shell_command.html">shell_command.rb</a>
+          <a class="source" href="recap/tasks.html">tasks.rb</a>
+          <a class="source" href="recap/tasks/bootstrap.html">bootstrap.rb</a>
+          <a class="source" href="recap/tasks/bundler.html">bundler.rb</a>
+          <a class="source" href="recap/tasks/deploy.html">deploy.rb</a>
+          <a class="source" href="recap/tasks/env.html">env.rb</a>
+          <a class="source" href="recap/tasks/foreman.html">foreman.rb</a>
+          <a class="source" href="recap/tasks/multistage.html">multistage.rb</a>
+          <a class="source" href="recap/tasks/preflight.html">preflight.rb</a>
+          <a class="source" href="recap/tasks/rails.html">rails.rb</a>
+          <a class="source" href="recap/tasks/ruby.html">ruby.rb</a>
+          <a class="source" href="recap/version.html">version.rb</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>recap.rb</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-Aims_and_features'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-Aims_and_features">&#182;</a>
+        </div>
+        <p>This is the documentation for <a href="https://github.com/freerange/recap">recap</a>, a simple, opinionated
+set of capistrano deployment recipes.</p>
+
+<p>Inspired in part by
+<a href="https://github.com/blog/470-deployment-script-spring-cleaning">this blog post</a>, these recipes use
+git&rsquo;s strengths to deploy applications in a faster, simpler manner than the standard capistrano
+deployment.</p>
+
+<h3>Aims and features</h3>
+
+<p>Releases are managed using git.  All code is deployed to a single directory, and git tags are
+used to manage different released versions.  No <code>releases</code>, <code>current</code> or <code>shared</code> directories are
+created, avoiding unnecessary sym-linking.  For more information on how releases work, see
+<a href="recap/tasks/deploy.html">recap/tasks/deploy.rb</a>.</p>
+
+<p>Deployments do the minimum work possible, using git to determine whether tasks need to run.  e.g.
+the <code>bundle:install</code> task only runs if the app contains a <code>Gemfile.lock</code> file and it has changed
+since the last deployment.  You can see how this works in
+<a href="recap/tasks/bundler.html">recap/tasks/bundler.rb</a>.</p>
+
+<p>Applications have their own user and group, owning all of that application&rsquo;s associated
+files and processes.  This gives them a dedicated environment, allowing environment variables to
+be used for application specific configuration.  Tasks such as <code>env</code>, <code>env:set</code> and <code>env:edit</code> make
+setting and changing these variables easy.  <a href="recap/tasks/env.html">recap/tasks/env.rb</a> has more
+information about using these environment variables.</p>
+
+<p>Personal accounts are used to deploy to the server, distinct from the application user.  The right
+to deploy an application is granted simply by adding a user to the application group.  Most tasks
+are run as the application user using <code>sudo su&hellip;</code>.  To avoid having to enter a password when
+running them, these lines can be added to <code>/etc/sudoers.d/application</code>
+(change <code>application</code> to the name of your app).</p>
+
+<pre>%application ALL=NOPASSWD: /sbin/start application*
+%application ALL=NOPASSWD: /sbin/stop application*
+%application ALL=NOPASSWD: /sbin/restart application*
+%application ALL=NOPASSWD: /bin/su &ndash; application*
+%application ALL=NOPASSWD: /bin/su application*</pre>
+
+<h3>Limitations and Constraints</h3>
+
+<p>Recap has been developed and tested using Ubuntu 11.04. It may work well with
+other flavours of unix, but proceed with caution.</p>
+
+<p>Recap also uses a different file layout than other capistrano-based deployments, so other
+recipes may not work well with it.  You can improve compatibility with other recipes using
+<a href="recap/support/compatibility.html">recap/support/compatibility.rb</a>.</p>
+
+<h3>Getting started</h3>
+
+<p>To use recap you&rsquo;ll need a project stored in <code>git</code>.  You&rsquo;ll also need a server with <code>git</code> installed
+and if deploying a rails or ruby app, <code>bundler</code> and <code>ruby</code> too.  Finally you need an account on the
+server which you can SSH into and which is a sudoer.</p>
+
+<h4>Preparing your project</h4>
+
+<p>To get a project ready to deploy with recap, you&rsquo;ll need to install the gem, most likely by adding
+an entry like the following to the <code>Gemfile</code>, then running <code>bundle install</code>.</p>
+
+<pre>gem &lsquo;recap&rsquo;, &lsquo;~>1.0.0&rsquo;</pre>
+
+<p>Once the gem is installed, generate a <code>Capfile</code> by running <code>recap setup</code> within your project
+folder.  You can see the supported options with <code>recap help setup</code>.  The generated <code>Capfile</code>
+will look something like this:</p>
+
+<pre>require &lsquo;recap/recipes/rails&rsquo;
+
+set :application, &lsquo;example-app&rsquo;
+set :repository, &lsquo;git@example.com:example/example-app.git&rsquo;
+
+server &lsquo;server.example.com&rsquo;, :app</pre>
+
+<p>Edit the <code>Capfile</code> to point at your deployment server and your project should be ready.  <code>cap -T</code>
+will show all the tasks now available.</p>
+
+<h4>Preparing the server</h4>
+
+<p>The next step is setting up the server.  Running <code>cap bootstrap</code> will check your personal account
+on the server is configured correctly, and add an account for your application.</p>
+
+<p>This application account is dedicated to your app, so you can edit its <code>.profile</code> as much as you
+need (to add a particular version of <code>ruby</code> to the path, for example).
+<a href="recap/tasks/env.html">recap/tasks/env.rb</a> information on how to use the <code>env:set</code> and <code>env:edit</code>
+tasks to set configuration variables.</p>
+
+<h4>Preparing the app</h4>
+
+<p>Running <code>cap deploy:setup</code> clones your code and sets up everything ready for the first deployment.
+Once this has been run, you might want to set up a virtual host entry for nginx or Apache to
+point at your app.</p>
+
+<h4>Deploying</h4>
+
+<p>Finally running <code>cap deploy</code> will deploy your app for the first time.  Each time you make a change
+you want deployed, commit and push your changes to your <code>git</code> repository, and run <code>cap deploy</code> to
+push those changes to the server.</p>
+
+<h3>Further information</h3>
+
+<p>Recap has recipes to deploy static, ruby-based and rails apps which you can find out about in
+<a href="recap/recipes.html">recap/recipes</a>.</p>
+
+<p>For more information about all the capistrano tasks recap provides, see
+<a href="recap/tasks.html">recap/tasks</a>.</p>
+
+<h3>Versioning and License</h3>
+
+<p>recap uses <a href="http://semver.org/">semantic versioning</a>.
+The code is available <a href="https://github.com/freerange/recap">on github</a> and released under the
+<a href="https://github.com/freerange/recap/blob/master/LICENSE">MIT License</a></p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span></span><span class="k">module</span> <span class="nn">Recap</span>
+  <span class="k">module</span> <span class="nn">Support</span>
+    <span class="nb">autoload</span> <span class="ss">:Compatibility</span><span class="p">,</span> <span class="s1">&#39;recap/support/compatibility&#39;</span>
+    <span class="nb">autoload</span> <span class="ss">:Namespace</span><span class="p">,</span> <span class="s1">&#39;recap/support/namespace&#39;</span>
+    <span class="nb">autoload</span> <span class="ss">:Environment</span><span class="p">,</span> <span class="s1">&#39;recap/support/environment&#39;</span>
+    <span class="nb">autoload</span> <span class="ss">:ShellCommand</span><span class="p">,</span> <span class="s1">&#39;recap/support/shell_command&#39;</span>
+    <span class="nb">autoload</span> <span class="ss">:CLI</span><span class="p">,</span> <span class="s1">&#39;recap/support/cli&#39;</span>
+  <span class="k">end</span>
+
+  <span class="nb">autoload</span> <span class="ss">:Version</span><span class="p">,</span> <span class="s1">&#39;recap/version&#39;</span>
+<span class="k">end</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>

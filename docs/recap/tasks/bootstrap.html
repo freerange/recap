@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>bootstrap.rb</title>
+  <link rel="stylesheet" href="http://gofreerange.com/stylesheets/rocco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="../../recap.html">recap.rb</a>
+          <a class="source" href="../recipes.html">recipes.rb</a>
+          <a class="source" href="../recipes/rails.html">rails.rb</a>
+          <a class="source" href="../recipes/ruby.html">ruby.rb</a>
+          <a class="source" href="../recipes/static.html">static.rb</a>
+          <a class="source" href="../support/capistrano_extensions.html">capistrano_extensions.rb</a>
+          <a class="source" href="../support/cli.html">cli.rb</a>
+          <a class="source" href="../support/compatibility.html">compatibility.rb</a>
+          <a class="source" href="../support/environment.html">environment.rb</a>
+          <a class="source" href="../support/namespace.html">namespace.rb</a>
+          <a class="source" href="../support/shell_command.html">shell_command.rb</a>
+          <a class="source" href="../tasks.html">tasks.rb</a>
+          <a class="source" href="bootstrap.html">bootstrap.rb</a>
+          <a class="source" href="bundler.html">bundler.rb</a>
+          <a class="source" href="deploy.html">deploy.rb</a>
+          <a class="source" href="env.html">env.rb</a>
+          <a class="source" href="foreman.html">foreman.rb</a>
+          <a class="source" href="multistage.html">multistage.rb</a>
+          <a class="source" href="preflight.html">preflight.rb</a>
+          <a class="source" href="rails.html">rails.rb</a>
+          <a class="source" href="ruby.html">ruby.rb</a>
+          <a class="source" href="../version.html">version.rb</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>bootstrap.rb</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        <p>Recap has a number of requirements on your server before you can deploy applications
+with it.  These include:</p>
+
+<ul>
+<li>Each application needs its own account on the server.  The full account environment
+is loaded whenever an application command or process is run, so this is the place where
+other application specific configuration should happen.</li>
+<li>Each deploying user needs a personal account on the server which they should be able to
+ssh into.</li>
+<li>This personal account needs to be able to <code>sudo</code>, both to switch to the application user
+and to run other administrative commands.</li>
+</ul>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span></span><span class="nb">require</span> <span class="s1">&#39;recap/tasks&#39;</span>
+
+<span class="k">module</span> <span class="nn">Recap::Tasks::Bootstrap</span>
+  <span class="kp">extend</span> <span class="no">Recap</span><span class="o">::</span><span class="no">Support</span><span class="o">::</span><span class="no">Namespace</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-2'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-2">&#182;</a>
+        </div>
+        <p>The bootstrap namespace has a couple of task that help configure application and personal accounts
+and personal accounts to meet these requirements.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="n">namespace</span> <span class="ss">:bootstrap</span> <span class="k">do</span>
+    <span class="n">set</span><span class="p">(</span><span class="ss">:remote_username</span><span class="p">)</span> <span class="p">{</span> <span class="n">capture</span><span class="p">(</span><span class="s1">&#39;whoami&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span> <span class="p">}</span>
+    <span class="n">set</span><span class="p">(</span><span class="ss">:application_home</span><span class="p">)</span> <span class="p">{</span> <span class="s2">&quot;/home/</span><span class="si">#{</span><span class="n">application_user</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-3'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-3">&#182;</a>
+        </div>
+        <p>The <code>bootstrap:application</code> task sets up the account on the server the application itself uses.  This
+account should be dedicated to running this application.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">desc</span> <span class="s1">&#39;Sets up the server account used by the application, including home directory and environment support&#39;</span>
+    <span class="n">task</span> <span class="ss">:application</span> <span class="k">do</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-4'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-4">&#182;</a>
+        </div>
+        <p>If the account doesn&rsquo;t already exist on the server, the task creates it.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>      <span class="k">if</span> <span class="n">exit_code</span><span class="p">(</span><span class="s2">&quot;id </span><span class="si">#{</span><span class="n">application_user</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span>
+        <span class="n">sudo</span> <span class="s2">&quot;useradd </span><span class="si">#{</span><span class="n">application_user</span><span class="si">}</span><span class="s2"> -d </span><span class="si">#{</span><span class="n">application_home</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-5'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-5">&#182;</a>
+        </div>
+        <p>If the home directory doesn&rsquo;t exist, or isn&rsquo;t both readable and writable by members of the application
+group (all the accounts allowed to deploy the app) then the task creates the directory and fixes
+file permissions.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>      <span class="n">sudo</span> <span class="s2">&quot;mkdir -p </span><span class="si">#{</span><span class="n">application_home</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="n">sudo</span> <span class="s2">&quot;chown </span><span class="si">#{</span><span class="n">application_user</span><span class="si">}</span><span class="s2">:</span><span class="si">#{</span><span class="n">application_group</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">application_home</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="n">sudo</span> <span class="s2">&quot;chmod 755 </span><span class="si">#{</span><span class="n">application_home</span><span class="si">}</span><span class="s2">&quot;</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-6'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-6">&#182;</a>
+        </div>
+        <p>A script <code>.recap</code> is added to set the configuration environment (set with <code>env:set</code> and
+<code>env:edit</code> tasks).  The script loads the <code>.env</code> file in the users home folder, creates
+a new copy with <code>export</code> prefixed to each line, and sources this new copy.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>      <span class="n">put_as_app</span> <span class="sx">%{</span>
+<span class="sx">if [ -s &quot;$HOME/.env&quot; ]; then</span>
+<span class="sx">  sed -e &#39;s/\\r//g&#39; -e &#39;s/^/export /g&#39; $HOME/.env &gt; $HOME/.recap-env-export</span>
+<span class="sx">  . $HOME/.recap-env-export</span>
+<span class="sx">fi</span>
+<span class="sx">      }</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">application_home</span><span class="si">}</span><span class="s2">/.recap&quot;</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-7'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-7">&#182;</a>
+        </div>
+        <p>Finally, <code>.profile</code> needs to source the <code>.recap</code> script, so that the configuration environment is
+available whenever the environment is loaded.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>      <span class="n">as_app</span> <span class="s2">&quot;touch .profile&quot;</span><span class="p">,</span> <span class="s2">&quot;~&quot;</span>
+
+      <span class="k">if</span> <span class="n">exit_code</span><span class="p">(</span><span class="s2">&quot;grep &#39;</span><span class="se">\\</span><span class="s2">. $HOME/</span><span class="se">\\</span><span class="s2">.recap&#39; </span><span class="si">#{</span><span class="n">application_home</span><span class="si">}</span><span class="s2">/.profile&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span>
+        <span class="n">as_app</span> <span class="sx">%{echo &quot;. \\$HOME/.recap&quot; &gt;&gt; .profile}</span><span class="p">,</span> <span class="s2">&quot;~&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-8'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-8">&#182;</a>
+        </div>
+        <p>The <code>bootstrap:user</code> task sets up the personal accounts of users who can deploy applications.
+In order to deploy a particular app, the account&rsquo;s git configuration must be set (so
+that releases can be tagged), and the account must be a member of the application group.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">desc</span> <span class="s1">&#39;Sets up the server account used by a deploying user&#39;</span>
+    <span class="n">task</span> <span class="ss">:user</span> <span class="k">do</span>
+      <span class="n">git_user_name</span> <span class="o">=</span> <span class="no">Recap</span><span class="o">::</span><span class="no">Support</span><span class="o">::</span><span class="no">ShellCommand</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;git config user.name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span>
+      <span class="n">git_user_email</span> <span class="o">=</span> <span class="no">Recap</span><span class="o">::</span><span class="no">Support</span><span class="o">::</span><span class="no">ShellCommand</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;git config user.email&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span>
+      <span class="n">run</span> <span class="s2">&quot;git config --global user.name &#39;</span><span class="si">#{</span><span class="n">git_user_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+      <span class="n">run</span> <span class="s2">&quot;git config --global user.email &#39;</span><span class="si">#{</span><span class="n">git_user_email</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+      <span class="n">sudo</span> <span class="s2">&quot;usermod --append -G </span><span class="si">#{</span><span class="n">application_group</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">remote_username</span><span class="si">}</span><span class="s2">&quot;</span>
+
+      <span class="k">if</span> <span class="n">repository</span><span class="o">.</span><span class="n">match</span> <span class="sr">/github\.com/</span>
+        <span class="n">run</span> <span class="s2">&quot;(mkdir -p ~/.ssh &amp;&amp; touch ~/.ssh/known_hosts &amp;&amp; ssh-keygen -f ~/.ssh/known_hosts -H -F github.com | grep &#39;github.com&#39;) || ssh-keyscan -H github.com &gt; ~/.ssh/known_hosts&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-9'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-9">&#182;</a>
+        </div>
+        <p>The <code>bootstrap</code> task simply runs both the <code>bootstrap:application</code> and <code>bootstrap:user</code> tasks
+in turn.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">task</span> <span class="ss">:default</span> <span class="k">do</span>
+      <span class="n">application</span>
+      <span class="n">user</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>

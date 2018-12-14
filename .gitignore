@@ -5,4 +5,3 @@ Gemfile.lock
 pkg/*
 /test-vm/share/*
 capistrano.log
-docs
