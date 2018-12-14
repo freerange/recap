@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>multistage.rb</title>
+  <link rel="stylesheet" href="https://gofreerange.com/stylesheets/rocco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="../../recap.html">recap.rb</a>
+          <a class="source" href="../recipes.html">recipes.rb</a>
+          <a class="source" href="../recipes/rails.html">rails.rb</a>
+          <a class="source" href="../recipes/ruby.html">ruby.rb</a>
+          <a class="source" href="../recipes/static.html">static.rb</a>
+          <a class="source" href="../support/capistrano_extensions.html">capistrano_extensions.rb</a>
+          <a class="source" href="../support/cli.html">cli.rb</a>
+          <a class="source" href="../support/compatibility.html">compatibility.rb</a>
+          <a class="source" href="../support/environment.html">environment.rb</a>
+          <a class="source" href="../support/namespace.html">namespace.rb</a>
+          <a class="source" href="../support/shell_command.html">shell_command.rb</a>
+          <a class="source" href="../tasks.html">tasks.rb</a>
+          <a class="source" href="bootstrap.html">bootstrap.rb</a>
+          <a class="source" href="bundler.html">bundler.rb</a>
+          <a class="source" href="deploy.html">deploy.rb</a>
+          <a class="source" href="env.html">env.rb</a>
+          <a class="source" href="foreman.html">foreman.rb</a>
+          <a class="source" href="multistage.html">multistage.rb</a>
+          <a class="source" href="preflight.html">preflight.rb</a>
+          <a class="source" href="rails.html">rails.rb</a>
+          <a class="source" href="ruby.html">ruby.rb</a>
+          <a class="source" href="../version.html">version.rb</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>multistage.rb</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        <p>Recap doesn&rsquo;t yet provide any specific tools for multistage deployments
+(deploying to different servers for <code>production</code>, <code>staging</code>, <code>qa</code>, etc.),
+but you can still easily support them.</p>
+
+<p>The easiest way is to define your own task for each environment, and
+declare servers and other configuration within those tasks.  For example,
+a <code>Capfile</code> targetting both a <code>staging</code> and <code>production</code> environment
+might look like this:</p>
+
+<pre>
+require &lsquo;recap/recipes/rails&rsquo;
+
+set :application, &lsquo;blanche&rsquo;
+set :repository, &lsquo;git@github.com:tomafro/blanche&rsquo;
+
+task :staging do
+  server &lsquo;staging.example.com&rsquo;, :app
+end
+
+task :production do
+  set :branch, &lsquo;production&rsquo;
+  server &lsquo;production.example.com&rsquo;, :app
+end
+</pre>
+
+<p>The two environments deploy to different servers, and the production
+environment deploys the <code>production</code> branch of code, rather than
+the default (which is <code>master</code>).</p>
+
+<p>To run tasks against each environment, simply call the environment
+task first, i.e. <code>cap staging deploy</code>, or <code>cap production bootstrap</code>.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span></span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>

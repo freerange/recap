@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>recipes.rb</title>
+  <link rel="stylesheet" href="https://gofreerange.com/stylesheets/rocco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="../recap.html">recap.rb</a>
+          <a class="source" href="recipes.html">recipes.rb</a>
+          <a class="source" href="recipes/rails.html">rails.rb</a>
+          <a class="source" href="recipes/ruby.html">ruby.rb</a>
+          <a class="source" href="recipes/static.html">static.rb</a>
+          <a class="source" href="support/capistrano_extensions.html">capistrano_extensions.rb</a>
+          <a class="source" href="support/cli.html">cli.rb</a>
+          <a class="source" href="support/compatibility.html">compatibility.rb</a>
+          <a class="source" href="support/environment.html">environment.rb</a>
+          <a class="source" href="support/namespace.html">namespace.rb</a>
+          <a class="source" href="support/shell_command.html">shell_command.rb</a>
+          <a class="source" href="tasks.html">tasks.rb</a>
+          <a class="source" href="tasks/bootstrap.html">bootstrap.rb</a>
+          <a class="source" href="tasks/bundler.html">bundler.rb</a>
+          <a class="source" href="tasks/deploy.html">deploy.rb</a>
+          <a class="source" href="tasks/env.html">env.rb</a>
+          <a class="source" href="tasks/foreman.html">foreman.rb</a>
+          <a class="source" href="tasks/multistage.html">multistage.rb</a>
+          <a class="source" href="tasks/preflight.html">preflight.rb</a>
+          <a class="source" href="tasks/rails.html">rails.rb</a>
+          <a class="source" href="tasks/ruby.html">ruby.rb</a>
+          <a class="source" href="version.html">version.rb</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>recipes.rb</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        <p>There are three main recipes, defined in <a href="recipes/static.html">recap/recipes/static.rb</a>,
+<a href="recipes/ruby.html">recap/recipes/ruby.rb</a> and <a href="recipes/rails.html">recap/recipes/rails.rb</a>
+that include tasks for static, ruby-based and rails sites respectively.  One of these should be
+required at the top of your <code>Capfile</code>.</p>
+
+<p>The static recipe includes all the main deployment behaviour.  It provides everything you
+should need to push static content up to one or more servers, as well as the ability to
+rollback to a previous release if you make a mistake.</p>
+
+<p>The ruby recipe builds on this with support for <code>bundler</code>, to automatically install any
+bundled gems.  It also includes <code>foreman</code> support, starting and restarting processes
+defined in a <code>Procfile</code>.</p>
+
+<p>The rails recipe includes all the above, and adds automatic database migration and
+asset compilation to each deploy.</p>
+
+<p>To swap between each of these, simply change the top line of your <code>Capfile</code> to require
+the one you want.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span></span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
